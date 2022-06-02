@@ -4,31 +4,35 @@ import java.io.File
 
 class PeopleFinder {
     private val people = mutableListOf<String>()
-
-    private fun enterPeople() {
-        println("Enter the number of people:")
-        var numPeople = readln().toIntOrNull() ?: 0
-
-        println("Enter all people:")
-        while (numPeople-- > 0) {
-            people.add(readln())
-        }
-    }
+    private var lookup = mutableMapOf<String, MutableList<Int>>()
 
     fun loadPeople(fileName: String) {
         for (person in File(fileName).readLines()) {
             people.add(person)
         }
+        buildIndex()
+    }
+
+    private fun buildIndex() {
+        people.forEachIndexed { idx, data ->
+            data.split(Regex("\\s+")).forEach { entry ->
+                lookup.getOrPut(entry.lowercase()) { mutableListOf() }.add(idx)
+            }
+        }
     }
 
     private fun findPerson() {
         println("\nEnter a name or email to search all suitable people.")
-        val query = readln()
+        val query = readln().lowercase()
 
-        val results = people.filter { it.contains(query, true) }
+        val results = people.filterIndexed { idx, _ ->
+            lookup.contains(query) && lookup[query]!!.contains(idx)
+        }
+
         if (results.isEmpty()) {
             println("No matching people found.")
         } else {
+            println("${results.size} person${if (results.size > 1) " " else ""} found.")
             for (line in results) {
                 println(line)
             }
