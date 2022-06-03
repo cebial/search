@@ -22,19 +22,29 @@ class PeopleFinder {
     }
 
     private fun findPerson() {
-        println("\nEnter a name or email to search all suitable people.")
-        val query = readln().lowercase()
+        println("\nSelect a matching strategy: ALL, ANY, NONE")
+        val strategy = readln()
 
-        val results = people.filterIndexed { idx, _ ->
-            lookup.contains(query) && lookup[query]!!.contains(idx)
+        println("\nEnter a name or email to search all matching people.")
+        val query = readln().lowercase().split(Regex("\\s+"))
+
+        var matches = if (strategy == "ANY") setOf() else List(people.size) { it }.toSet()
+
+        for (term in query) {
+            val set = lookup[term] ?: setOf()
+            when (strategy) {
+                "ALL" -> matches = matches.intersect(set)
+                "ANY" -> matches += set
+                "NONE" -> matches -= set
+            }
         }
 
-        if (results.isEmpty()) {
+        if (matches.isEmpty()) {
             println("No matching people found.")
         } else {
-            println("${results.size} person${if (results.size > 1) " " else ""} found.")
-            for (line in results) {
-                println(line)
+            println("${matches.size} person${if (matches.size > 1) "s" else ""} found.")
+            for (idx in matches) {
+                println(people[idx])
             }
         }
     }
@@ -64,7 +74,9 @@ class PeopleFinder {
             when (readln().toInt()) {
                 1 -> findPerson()
                 2 -> showPeople()
-                0 -> { println("Bye!"); return }
+                0 -> {
+                    println("Bye!"); return
+                }
                 else -> println("\nIncorrect option! Try again.")
             }
         }
