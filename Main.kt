@@ -4,7 +4,7 @@ import java.io.File
 
 class PeopleFinder {
     private val people = mutableListOf<String>()
-    private var lookup = mutableMapOf<String, MutableList<Int>>()
+    private var lookup = mutableMapOf<String, MutableSet<Int>>()
 
     fun loadPeople(fileName: String) {
         for (person in File(fileName).readLines()) {
@@ -16,7 +16,7 @@ class PeopleFinder {
     private fun buildIndex() {
         people.forEachIndexed { idx, data ->
             data.split(Regex("\\s+")).forEach { entry ->
-                lookup.getOrPut(entry.lowercase()) { mutableListOf() }.add(idx)
+                lookup.getOrPut(entry.lowercase()) { mutableSetOf() }.add(idx)
             }
         }
     }
